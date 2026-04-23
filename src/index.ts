@@ -137,6 +137,7 @@ ${overviewDocs}
 </docs>
 
 Your job:
+- Select a banner type to generate based on the user prompt. If unsure which type to choose, default to announcement banner.
 - Convert the user request into a valid banner configuration.
 - Follow the documented banner schema and field semantics exactly.
 - Generate only fields that are relevant to the user request.
