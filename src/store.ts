@@ -6,7 +6,7 @@ import { specificDocs } from "./docs.js";
 dotenv.config();
 
 const client = createClient({
-    url: "redis://127.0.0.1:6378"
+    url: "redis://127.0.0.1:6379"
 });
 
 await client.connect();

@@ -1,45 +1,22 @@
-# Email Signup Banner Configuration
+# Single Announcement Banner Configuration
 
-The Email Signup Banner (`template: 2`) is used to collect user emails, phone numbers, and consent for marketing purposes.
+The Single Announcement Banner is the simplest banner type, used to display promotional text and call-to-action buttons. It uses `banner_type: 0`.
 
-## Specific Fields in `IBannerTemplate` (`EmailBannerTemplateSchema`)
+## `IBannerTemplate` Fields
 
-* **`template`** (`number`): Must be `2` (`BannerTemplateType.EMAIL_SIGNUP`).
-* **`banner_text`** (`EmailBannerText`): Object containing text states for the form.
-  * *Properties*:
-    * `default` (`string`): The message shown initially (e.g., "Sign up to our newsletter").
-    * `success` (`string`): The message shown after successful submission (e.g., "Thank you for subscribing!").
-* **`form_structure`** (`EmailSignupFormStructure`, optional): Deep configuration of the form inputs.
-  * *Properties*: `bannerGap` (`number`), `fieldGap` (`number`), `inputBGColor` (`string`), `inputTextColor` (`string`), `structures` (Array of `EmailStructure` defining inputs like email, phone, name, checkboxes).
-* **`content_order`** (`string`, optional): Layout order, typically `'text,form,action'`.
-* **`coupon_source`** (`number`, optional): Where the discount originates from (e.g., `0` for none, `1` for synced from Shopify, `2` for Custom).
-* **`discount_id`** (`string`, optional): The backend ID of the discount to validate or apply upon sign-up.
-
-## Action & Coupon Fields (`ActionSchemaWithCoupon`)
-
-* **`act_type`** (`number`): The type of submit action element displayed. 
-* **`act_text`** (`string`): The text label displayed inside the submit button (e.g., "Subscribe Now").
-* **`enable_coupon`** (`boolean`): Toggles the visibility of a coupon code block that might be revealed after sign-up.
-* **`coupon_code`** (`string`): The actual code string (e.g., `WELCOME10`).
-* **`btn_style`** (`number`): Style index.
-* **`act_content_color`** (`string`): Background color of the CTA button.
-* **`btn_text_color`** (`string`): Text color of the CTA button.
-* **`btn_copy`** (`object`): 
-  * `text_copy` (`string`): Label for copying the code.
-  * `success_mess` (`string`): Success label (e.g., 'COPIED ✅').
-* **`content_gap`** (`number`): Spacing between form fields and text.
-
-## Specific Fields in `IBannerConfig` (`EmailBannerSchema`)
-
-The global settings for the Email Signup Banner build upon the `CoreBannerSchema` by adding integration capabilities.
-
-* **`email_integrations`** (`BannerIntegration`, optional/nullable): Configures synchronization with external apps.
-  * *Properties*:
-    * `shopify` (`object`): `{ enabled: boolean, tags: string }`
-    * `klaviyo` (`object`): `{ enabled: boolean, listId: string }`
-    * `omnisend` (`object`): `{ enabled: boolean, tags: string }` (if applicable)
-
-All standard scheduling, geographical, and page targeting rules from `CoreBannerSchema` also apply.
+* **`template`** (`number`): Must be `0` (`BannerTemplateType.ANNOUNCEMENT`).
+* **`banner_text`** (`string`): The primary content of the banner.
+* **`act_type`** (`number`): The type of action element displayed. 
+  * *Allowed Values*: Typically `0` (None), `1` (Text Link), `2` (Button), `3` (Block-level CTA).
+* **`act_text`** (`string`): The text label displayed inside the call-to-action button or link (e.g., "Shop Now").
+* **`clickable`** (`boolean`): If `true`, the entire banner area becomes a clickable hyperlink.
+* **`redirect_url`** (`string`, optional): The destination URL if `clickable` is `true` or if an action button is pressed.
+* **`content_order`** (`string`, optional): A comma-separated string dictating the layout order of internal elements.
+  * *Allowed Values*: Combinations like `'text,action'`, `'action,text'`, `'text,coupon'`, etc.
+* **`btn_settings`** (`BannerBtnSetting`, optional): A detailed configuration object for the button.
+  * *Properties*: Includes `target_blank` (boolean), `url` (string), `btn_style` (string), `btn_color` (hex string), `btn_txt_color` (hex string), `padding` (string), `animation` (enum number).
+* **`enable_coupon`** (`boolean`): From `ActionSchemaWithCoupon`, enables the coupon block.
+* **`coupon_code`** (`string`): The coupon code to copy.
 
 ## Core Template Fields (`CoreBannerTemplateSchema` / `IBannerTemplate`)
 

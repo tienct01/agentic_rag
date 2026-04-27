@@ -1,0 +1,298 @@
+[human]: Create a christmas sale banner
+-----
+
+[system]:
+            Query: Create a christmas sale banner
+            Banner Type: 3
+            Docs: # Discount Banner Configuration
+
+The Discount Banner (`template: 4`) displays a promotional code that users can copy or automatically apply to their cart.
+
+## Specific Fields in `IBannerTemplate` (`DiscountBannerTemplateSchema`)
+
+* **`template`** (`number`): Must be `4` (`BannerTemplateType.DISCOUNT`).
+* **`banner_text`** (`string`): The promotional message surrounding the discount code (e.g., "Use code below for 20% off!").
+* **`discount_id`** (`string`, optional): The backend ID of the discount (e.g., Shopify PriceRule ID) to validate or apply.
+* **`auto_apply_discount`** (`boolean`): If `true`, clicking the banner or an action button automatically applies the code to the user's session/cart. This is inherited from the base `CoreBannerTemplateSchema`.
+* **`discount_style`** (`object`): Styling specifically for the coupon box itself (separate from the main banner background).
+  * *Properties*:
+    * `border` (`number`): Border style index.
+    * `background` (`string`): Hex background color.
+    * `text_color` (`string`): Hex text color.
+    * `font_size` (`number`): Font size of the coupon text.
+
+## Action & Coupon Fields (`ActionSchemaWithCoupon`)
+
+* **`act_type`** (`number`): Action type (e.g., 0=None, 1=Link, 2=Button).
+* **`act_text`** (`string`): CTA Button label.
+* **`enable_coupon`** (`boolean`): Toggles the visibility of the coupon code block itself.
+* **`coupon_code`** (`string`): The actual code string (e.g., `SUMMER50`).
+* **`btn_style`** (`number`): Style index.
+* **`act_content_color`** (`string`): Hex color.
+* **`btn_text_color`** (`string`): Hex color.
+* **`btn_copy`** (`object`):
+  * `text_copy` (`string`): Label for copying (e.g., "Copy Code").
+  * `success_mess` (`string`): Success label (e.g., "COPIED ✅").
+* **`content_gap`** (`number`): Spacing between components.
+* **`content_order`** (`string`, optional): Display order (e.g., 'text,coupon,action').
+
+
+
+* Uses the standard `CoreBannerSchema` config. All scheduling, geographical, and page targeting rules apply identically.
+
+## Core Template Fields (`CoreBannerTemplateSchema` / `IBannerTemplate`)
+
+### Background
+
+- `bg_type` (`number`): `0` solid, `1` gradient, `2` image.
+- `bg_color` (`string`): Hex color used for solid background.
+- `bg_opacity` (`number`): Opacity from `0` to `100`.
+- `bg_gradient` (`string`): JSON string gradient payload, for example `{"color1":"#fff","color2":"#000"}`.
+- `bg_preset` (`number`, optional): Preset background ID.
+- `bg_img_url_cdn` (`string`, optional): CDN image URL.
+- `bg_img_url_s3` (`string`, optional): S3 image URL.
+- `bg_img_path_name` (`string`, optional): Stored image path.
+- `bg_size` (`string`, optional): CSS-like value such as `cover` or `contain`.
+
+### Typography
+
+- `font_family` (`string`): Font family name.
+- `font_url` (`string`, optional): Font URL.
+- `font_url_cdn` (`string`, optional): CDN font URL.
+- `font_color` (`string`, optional): Base text color in hex.
+- `font_scale_enabled` (`boolean`): Enable global font scaling.
+- `font_scale` (`number`): Font scale multiplier.
+- `font_size_button` (`number`): Base button font size in px.
+
+### Spacing And Borders
+
+- `bg_padding` (`number`): Base padding.
+- `bg_padding_bottom` (`number`): Bottom padding.
+- `bg_padding_left` (`number`): Left padding.
+- `bg_padding_right` (`number`): Right padding.
+- `mobile_padding_enabled` (`boolean`): Enable mobile-specific padding.
+- `mb_bg_padding` (`string`): Mobile padding shorthand, for example `10px 15px`.
+- `border_width` (`string`): CSS-like border width, for example `1px 1px 1px 1px`.
+- `border_radius` (`string`): CSS-like border radius.
+- `border_color` (`string`): Border color in hex.
+- `border_style` (`number`): Style enum (solid, dashed, etc.).
+
+### Behavior
+
+- `clickable` (`boolean`): Entire banner is clickable when enabled.
+- `redirect_url` (`string`, optional): Target URL for click actions.
+- `auto_apply_discount` (`boolean`): Auto-apply discount on click.
+- `cta_popup_config` (`object`, optional): Popup trigger config (`popup_id`, `popup_type`, `delay_time`).
+- `button_styles` (`record`, optional): Button style overrides.
+- `btn_settings` (`record`, optional): Additional CTA button settings.
+
+## Core Config Fields (`CoreBannerSchema` / `IBannerConfig`)
+
+### General
+
+- `id` (`number`, optional): Banner ID.
+- `name` (`string`): Banner internal name.
+- `banner_type` (`number`): `0` single, `1` rotate, `2` running, `3` multi.
+- `enable` (`boolean`): Publish status.
+- `position` (`number`): Placement position.
+- `priority` (`number`, optional): Priority when conflicts happen.
+- `close_button` (`boolean`): Show close icon.
+- `btn_close_color` (`string`): Close icon color.
+- `custom_css` (`string`, optional): Custom CSS for wrapper.
+
+### Page And Device Targeting
+
+- `pages` (`string[]`): Included page groups, for example `all`, `home`, `product`, `cart`.
+- `enable_excl_pages` (`boolean`): Enable exclusions.
+- `excl_pages` (`string`, optional): Comma-separated excluded paths.
+- `specific_pages` (`string`, optional): Comma-separated allowlist paths.
+- `show_device` (`string`): `all`, `desktop`, or `mobile`.
+
+### Customer And Geo Targeting
+
+- `customer_type` (`number`): Login targeting mode.
+- `customer_ids` (`string[]`, optional): Included customer IDs.
+- `customer_tags` (`string[]`, optional): Included customer tags.
+- `excl_customer_type` (`number`, optional): Excluded login mode.
+- `excl_customer_ids` (`string[]`, optional): Excluded customer IDs.
+- `excl_customer_tags` (`string[]`, optional): Excluded customer tags.
+- `enable_allowed_countries` (`boolean`): Enable allowed-country targeting.
+- `country_type` (`number`): Country matching mode.
+- `countries` (`string[]`): Allowed country codes, for example `US`, `GB`.
+- `exclude_countries` (`record`, optional): Excluded country map.
+- `enable_language` (`boolean`): Enable language targeting.
+- `allowed_languages` (`string[]`): Allowed locale codes.
+
+### Product And Cart Targeting
+
+- `product_type` (`number`): Product targeting mode.
+- `collections` (`string[]`, optional): Included collections.
+- `product_ids` (`string[]`, optional): Included products.
+- `tags` (`string[]`, optional): Included product tags.
+- `excl_product_type` (`number`, optional): Excluded product targeting mode.
+- `excl_product_ids` (`string[]`, optional): Excluded products.
+- `excl_tags` (`string[]`, optional): Excluded tags.
+- `excl_product_collections` (`string[]`, optional): Excluded collections.
+- `collection_type` (`number`, optional): Collection-page targeting mode.
+- `collection_ids` (`string[]`, optional): Included collection IDs.
+- `trigger_settings` (`object`, optional): Advanced trigger config such as cart amount, operator, ATC tags.
+
+### Scheduling And Frequency
+
+- `enable_visibility_date` (`boolean`): Enable start date.
+- `enable_to_date` (`boolean`): Enable end date.
+- `from_date` (`string`, optional): ISO start datetime.
+- `to_date` (`string`, optional): ISO end datetime.
+- `enable_fixed_time` (`boolean`): Enable recurring schedule.
+- `fixed_time` (`record`, optional): Recurring schedule payload.
+- `delay_type` (`number`): `0` immediate, `1` delay, `2` scroll depth.
+- `delay_time` (`number`): Trigger value for delay type.
+- `show_again_type` (`number`): Re-show strategy.
+- `show_again_time` (`number`): Re-show interval value.
+
+
+-----
+
+[ai]:
+-----
+
+[tool]: {"selected_image":"https://production-banner-bucket.s3.us-east-2.amazonaws.com/bss_bp/image_library/105-oriental-lines-geometric-beige.png","reason":"Selected image based on matching tags: beige, minimal, neutral, warm"}
+-----
+
+[system]:
+            Query: {"selected_image":"https://production-banner-bucket.s3.us-east-2.amazonaws.com/bss_bp/image_library/105-oriental-lines-geometric-beige.png","reason":"Selected image based on matching tags: beige, minimal, neutral, warm"}
+            Banner Type: 0
+            Docs: # Single Announcement Banner Configuration
+
+The Single Announcement Banner is the simplest banner type, used to display promotional text and call-to-action buttons. It uses `banner_type: 0`.
+
+## `IBannerTemplate` Fields
+
+* **`template`** (`number`): Must be `0` (`BannerTemplateType.ANNOUNCEMENT`).
+* **`banner_text`** (`string`): The primary content of the banner.
+* **`act_type`** (`number`): The type of action element displayed.
+  * *Allowed Values*: Typically `0` (None), `1` (Text Link), `2` (Button), `3` (Block-level CTA).
+* **`act_text`** (`string`): The text label displayed inside the call-to-action button or link (e.g., "Shop Now").
+* **`clickable`** (`boolean`): If `true`, the entire banner area becomes a clickable hyperlink.
+* **`redirect_url`** (`string`, optional): The destination URL if `clickable` is `true` or if an action button is pressed.
+* **`content_order`** (`string`, optional): A comma-separated string dictating the layout order of internal elements.
+  * *Allowed Values*: Combinations like `'text,action'`, `'action,text'`, `'text,coupon'`, etc.
+* **`btn_settings`** (`BannerBtnSetting`, optional): A detailed configuration object for the button.
+  * *Properties*: Includes `target_blank` (boolean), `url` (string), `btn_style` (string), `btn_color` (hex string), `btn_txt_color` (hex string), `padding` (string), `animation` (enum number).
+* **`enable_coupon`** (`boolean`): From `ActionSchemaWithCoupon`, enables the coupon block.
+* **`coupon_code`** (`string`): The coupon code to copy.
+
+## Core Template Fields (`CoreBannerTemplateSchema` / `IBannerTemplate`)
+
+### Background
+
+- `bg_type` (`number`): `0` solid, `1` gradient, `2` image.
+- `bg_color` (`string`): Hex color used for solid background.
+- `bg_opacity` (`number`): Opacity from `0` to `100`.
+- `bg_gradient` (`string`): JSON string gradient payload, for example `{"color1":"#fff","color2":"#000"}`.
+- `bg_preset` (`number`, optional): Preset background ID.
+- `bg_img_url_cdn` (`string`, optional): CDN image URL.
+- `bg_img_url_s3` (`string`, optional): S3 image URL.
+- `bg_img_path_name` (`string`, optional): Stored image path.
+- `bg_size` (`string`, optional): CSS-like value such as `cover` or `contain`.
+
+### Typography
+
+- `font_family` (`string`): Font family name.
+- `font_url` (`string`, optional): Font URL.
+- `font_url_cdn` (`string`, optional): CDN font URL.
+- `font_color` (`string`, optional): Base text color in hex.
+- `font_scale_enabled` (`boolean`): Enable global font scaling.
+- `font_scale` (`number`): Font scale multiplier.
+- `font_size_button` (`number`): Base button font size in px.
+
+### Spacing And Borders
+
+- `bg_padding` (`number`): Base padding.
+- `bg_padding_bottom` (`number`): Bottom padding.
+- `bg_padding_left` (`number`): Left padding.
+- `bg_padding_right` (`number`): Right padding.
+- `mobile_padding_enabled` (`boolean`): Enable mobile-specific padding.
+- `mb_bg_padding` (`string`): Mobile padding shorthand, for example `10px 15px`.
+- `border_width` (`string`): CSS-like border width, for example `1px 1px 1px 1px`.
+- `border_radius` (`string`): CSS-like border radius.
+- `border_color` (`string`): Border color in hex.
+- `border_style` (`number`): Style enum (solid, dashed, etc.).
+
+### Behavior
+
+- `clickable` (`boolean`): Entire banner is clickable when enabled.
+- `redirect_url` (`string`, optional): Target URL for click actions.
+- `auto_apply_discount` (`boolean`): Auto-apply discount on click.
+- `cta_popup_config` (`object`, optional): Popup trigger config (`popup_id`, `popup_type`, `delay_time`).
+- `button_styles` (`record`, optional): Button style overrides.
+- `btn_settings` (`record`, optional): Additional CTA button settings.
+
+## Core Config Fields (`CoreBannerSchema` / `IBannerConfig`)
+
+### General
+
+- `id` (`number`, optional): Banner ID.
+- `name` (`string`): Banner internal name.
+- `banner_type` (`number`): `0` single, `1` rotate, `2` running, `3` multi.
+- `enable` (`boolean`): Publish status.
+- `position` (`number`): Placement position.
+- `priority` (`number`, optional): Priority when conflicts happen.
+- `close_button` (`boolean`): Show close icon.
+- `btn_close_color` (`string`): Close icon color.
+- `custom_css` (`string`, optional): Custom CSS for wrapper.
+
+### Page And Device Targeting
+
+- `pages` (`string[]`): Included page groups, for example `all`, `home`, `product`, `cart`.
+- `enable_excl_pages` (`boolean`): Enable exclusions.
+- `excl_pages` (`string`, optional): Comma-separated excluded paths.
+- `specific_pages` (`string`, optional): Comma-separated allowlist paths.
+- `show_device` (`string`): `all`, `desktop`, or `mobile`.
+
+### Customer And Geo Targeting
+
+- `customer_type` (`number`): Login targeting mode.
+- `customer_ids` (`string[]`, optional): Included customer IDs.
+- `customer_tags` (`string[]`, optional): Included customer tags.
+- `excl_customer_type` (`number`, optional): Excluded login mode.
+- `excl_customer_ids` (`string[]`, optional): Excluded customer IDs.
+- `excl_customer_tags` (`string[]`, optional): Excluded customer tags.
+- `enable_allowed_countries` (`boolean`): Enable allowed-country targeting.
+- `country_type` (`number`): Country matching mode.
+- `countries` (`string[]`): Allowed country codes, for example `US`, `GB`.
+- `exclude_countries` (`record`, optional): Excluded country map.
+- `enable_language` (`boolean`): Enable language targeting.
+- `allowed_languages` (`string[]`): Allowed locale codes.
+
+### Product And Cart Targeting
+
+- `product_type` (`number`): Product targeting mode.
+- `collections` (`string[]`, optional): Included collections.
+- `product_ids` (`string[]`, optional): Included products.
+- `tags` (`string[]`, optional): Included product tags.
+- `excl_product_type` (`number`, optional): Excluded product targeting mode.
+- `excl_product_ids` (`string[]`, optional): Excluded products.
+- `excl_tags` (`string[]`, optional): Excluded tags.
+- `excl_product_collections` (`string[]`, optional): Excluded collections.
+- `collection_type` (`number`, optional): Collection-page targeting mode.
+- `collection_ids` (`string[]`, optional): Included collection IDs.
+- `trigger_settings` (`object`, optional): Advanced trigger config such as cart amount, operator, ATC tags.
+
+### Scheduling And Frequency
+
+- `enable_visibility_date` (`boolean`): Enable start date.
+- `enable_to_date` (`boolean`): Enable end date.
+- `from_date` (`string`, optional): ISO start datetime.
+- `to_date` (`string`, optional): ISO end datetime.
+- `enable_fixed_time` (`boolean`): Enable recurring schedule.
+- `fixed_time` (`record`, optional): Recurring schedule payload.
+- `delay_type` (`number`): `0` immediate, `1` delay, `2` scroll depth.
+- `delay_time` (`number`): Trigger value for delay type.
+- `show_again_type` (`number`): Re-show strategy.
+- `show_again_time` (`number`): Re-show interval value.
+
+
+-----
+
+[ai]: {"reason":"Chose a single announcement banner (template 0) as a simple, flexible format for a Christmas sale. Used a warm festive background image selected from the library, enabled a visible coupon code (XMAS25) and a clear CTA button that links to the sale collection. Kept scheduling and targeting broad (pages: all, show_device: all) and used conservative defaults for padding, colors, and layout.","generated_config":"{\"name\":\"Christmas Sale - XMAS25\",\"banner_type\":0,\"enable\":true,\"position\":0,\"template\":0,\"banner_text\":\"Christmas Sale: Up to 40% off sitewide! Use code XMAS25 at checkout.\",\"act_type\":2,\"act_text\":\"Shop Now\",\"redirect_url\":\"https://example.com/collections/christmas-sale\",\"clickable\":false,\"content_order\":\"text,action,coupon\",\"btn_settings\":{\"target_blank\":false,\"url\":\"https://example.com/collections/christmas-sale\",\"btn_style\":\"primary\",\"btn_color\":\"#c91f1f\",\"btn_txt_color\":\"#ffffff\",\"padding\":\"10px 16px\",\"animation\":1},\"enable_coupon\":true,\"coupon_code\":\"XMAS25\",\"bg_type\":2,\"bg_img_url_s3\":\"https://production-banner-bucket.s3.us-east-2.amazonaws.com/bss_bp/image_library/105-oriental-lines-geometric-beige.png\",\"bg_size\":\"cover\",\"bg_opacity\":100,\"font_family\":\"Helvetica, Arial, sans-serif\",\"font_color\":\"#ffffff\",\"bg_padding\":12,\"border_radius\":\"6px\",\"close_button\":true,\"btn_close_color\":\"#ffffff\",\"pages\":[\"all\"],\"show_device\":\"all\"}"}

@@ -1,58 +1,25 @@
-# Core Banner Configuration
+# Running Announcement Banner Configuration
 
-This document defines the shared base model used by all banner types.
+The Running Announcement Banner is used to display a marquee-style running banner with text or media blocks. It uses `banner_type: 2`.
 
-## Purpose
+## `IBannerTemplate` Fields
 
-Use this file as the source of truth for:
-
-- Core inheritance model (config vs template)
-- Shared fields allowed across banner types
-- Common validation and generation rules
-
-For template-specific fields, see files in `docs/specific/`.
-
-## Architecture Model
-
-Banner data has two layers:
-
-1. Config layer (`CoreBannerSchema` / `IBannerConfig`)
-- Controls where, when, and to whom a banner appears.
-- Extended by wrapper types such as Single, Rotate, Running, Multi.
-
-2. Template layer (`CoreBannerTemplateSchema` / `IBannerTemplate`)
-- Controls visuals and per-template content.
-- Stored in `banner_templates`.
-- Extended by specific template schemas (Announcement, Countdown, Email Signup, etc.).
-
-In short:
-
-- `IBannerConfig` is the wrapper-level behavior.
-- `IBannerTemplate` is the visual/content block.
-- Specific banner types inherit both base layers and add only their own fields.
-
-## Minimal Structure
-
-```json
-{
-  "name": "Summer Sale Banner",
-  "banner_type": 0,
-  "enable": true,
-  "position": 1,
-  "pages": ["home", "product"],
-  "banner_templates": [
-    {
-      "template": 0,
-      "bg_type": 0,
-      "bg_color": "#ff0000",
-      "font_family": "Arial",
-      "banner_text": "Sale ends tonight",
-      "act_type": 2,
-      "act_text": "Shop now"
-    }
-  ]
-}
-```
+* **`template`** (`number`): Must be `0` (`BannerTemplateType.ANNOUNCEMENT`).
+* **`banner_text`** (`string[] | MediaAnnouncement[]`): The primary content of the banner. An array of media blocks for marquee-style running banners, containing `type`, `content`, `size`, `image_url_cdn`, etc.
+* **`act_type`** (`number`): The type of action element displayed. 
+  * *Allowed Values*: Typically `0` (None), `1` (Text Link), `2` (Button), `3` (Block-level CTA).
+* **`act_text`** (`string`): The text label displayed inside the call-to-action button or link (e.g., "Shop Now").
+* **`clickable`** (`boolean`): If `true`, the entire banner area becomes a clickable hyperlink.
+* **`redirect_url`** (`string`, optional): The destination URL if `clickable` is `true` or if an action button is pressed.
+* **`content_order`** (`string`, optional): A comma-separated string dictating the layout order of internal elements.
+  * *Allowed Values*: Combinations like `'text,action'`, `'action,text'`, `'text,coupon'`, etc.
+* **`btn_settings`** (`BannerBtnSetting`, optional): A detailed configuration object for the button.
+  * *Properties*: Includes `target_blank` (boolean), `url` (string), `btn_style` (string), `btn_color` (hex string), `btn_txt_color` (hex string), `padding` (string), `animation` (enum number).
+* **`enable_coupon`** (`boolean`): From `ActionSchemaWithCoupon`, enables the coupon block.
+* **`coupon_code`** (`string`): The coupon code to copy.
+* **`animation_type`** (`number`): The animation type (specifically for Rotate and Running banners).
+* **`animation_duration`** (`string`): Duration of the animation (specifically for Rotate and Running banners).
+* **`animation_hover_pause`** (`boolean`): Pauses animation on hover (specifically for Rotate and Running banners).
 
 ## Core Template Fields (`CoreBannerTemplateSchema` / `IBannerTemplate`)
 
@@ -163,3 +130,15 @@ In short:
 - `delay_time` (`number`): Trigger value for delay type.
 - `show_again_type` (`number`): Re-show strategy.
 - `show_again_time` (`number`): Re-show interval value.
+
+
+## Config object structure
+
+This is an overview of the banner configuration structure.
+
+```ts
+type BannerConfig = {
+  config: IBannerConfig;
+  template: IBannerTemplate;
+}
+```

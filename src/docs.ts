@@ -5,6 +5,8 @@ const directoryLoader = new DirectoryLoader("docs/specific/", {
   ".md": (path: string) => new TextLoader(path),
 });
 
+
 export const specificDocs = await directoryLoader.load();
+
 
 
