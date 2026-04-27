@@ -7,6 +7,11 @@ import dotenv from "dotenv";
 import { specificDocs } from "./docs.js";
 import readline from "readline/promises";
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
 dotenv.configDotenv({
   path: ".env",
 });
@@ -58,6 +63,7 @@ const State = Annotation.Root({
   selectedImage: Annotation<string>(),
   generatedConfig: Annotation<any>(),
   reason: Annotation<string>(),
+  isMissing: Annotation<boolean>(),
 });
 
 const selectBannerType = async (state: typeof State.State) => {
@@ -96,14 +102,9 @@ Query: ${state.query}`;
 
   let bannerType = result.bannerType;
   if (bannerType === -1) {
-    const tempRl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    const answer = await tempRl.question(
+    const answer = await rl.question(
       "Could not determine banner type. Please enter a banner type (0-7) [default: 0]: "
     );
-    tempRl.close();
     bannerType = answer.trim() === "" ? 0 : parseInt(answer, 10);
     if (isNaN(bannerType) || bannerType < 0 || bannerType > 7) {
       bannerType = 0;
@@ -116,6 +117,45 @@ Query: ${state.query}`;
 const getBannerDocs = async (state: typeof State.State) => {
   const docs = selectBannerDocs(state.bannerType);
   return { docs: docs?.pageContent || "" };
+};
+
+const checkMissingInfo = async (state: typeof State.State) => {
+  const llm = new ChatOpenAI({
+    modelName: "gpt-4o-mini",
+  });
+
+  const schema = z.object({
+    isMissing: z
+      .boolean()
+      .describe("True if crucial information to configure the banner is missing from the query based on the docs"),
+    question: z
+      .string()
+      .describe("The question to ask the user to get the missing information, empty if none"),
+    fieldName: z.string().describe("The name of field of missing information, empty if none"),
+  });
+
+  const prompt = `You are a helpful assistant. Check if the user query is missing any crucial information required to create the banner configuration based on the provided documentation.
+If information about style, coupon is missing, concise question to ask the user to provide this info.
+
+Query: ${state.query}
+
+Docs:
+${state.docs}`;
+
+  const llmWithStructuredOutput = llm.withStructuredOutput(schema);
+  const result = await llmWithStructuredOutput.invoke([
+    new HumanMessage(prompt),
+  ]);
+
+  let updatedQuery = state.query;
+
+  if (result.isMissing && result.question) {
+    const answer = await rl.question(`\nQuestion: ${result.question}\nYour answer: `);
+    updatedQuery += `\n${result.fieldName}: ${answer}`;
+    return { query: updatedQuery, isMissing: true };
+  }
+
+  return { query: updatedQuery, isMissing: false };
 };
 
 const generateConfig = async (state: typeof State.State) => {
@@ -169,21 +209,25 @@ ${state.docs}
   };
 };
 
+const shouldGenerateConfig = (state: typeof State.State) => {
+  if (state.isMissing) {
+    return "checkMissingInfo";
+  }
+  return "generateConfig";
+};
+
 const graph = new StateGraph(State)
   .addNode("selectBannerType", selectBannerType)
   .addNode("getBannerDocs", getBannerDocs)
+  .addNode("checkMissingInfo", checkMissingInfo)
   .addNode("generateConfig", generateConfig)
   .addEdge(START, "selectBannerType")
   .addEdge("selectBannerType", "getBannerDocs")
-  .addEdge("getBannerDocs", "generateConfig")
+  .addEdge("getBannerDocs", "checkMissingInfo")
+  .addConditionalEdges("checkMissingInfo", shouldGenerateConfig)
   .addEdge("generateConfig", END);
 
 const app = graph.compile();
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
 
 while (true) {
   const input = await rl.question("Enter your prompt: ");
